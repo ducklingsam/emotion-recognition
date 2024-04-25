@@ -1,0 +1,58 @@
+/* styles.css */
+
+@font-face {
+    font-family: 'LocalFont';
+    src: url('fonts/undertale_battle_font.woff2') format('woff2'),
+    url('fonts/undertale_battle_font.woff') format('woff'),
+    url('fonts/undertale_battle_font.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+.red {
+    color: red;
+}
+
+.green {
+    color: green;
+}
+
+body, html {
+    height: 100%;
+    margin: 0;
+    background-color: black;
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: 'LocalFont', sans-serif;
+}
+
+#container {
+    text-align: center;
+}
+
+button {
+    display: block;
+    margin: 20px auto;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+input[type="file"] {
+    margin: 10px;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.blink {
+    animation: blinker 1s linear infinite;
+}
+
+@keyframes blinker {
+    50% {
+        opacity: 0;
+    }
+}
