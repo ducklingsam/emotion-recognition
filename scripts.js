@@ -9,23 +9,23 @@ async function checkSystemStatus() {
     try {
         const response = await fetch('/api/status');
         const statusDiv = document.getElementById('status');
-        if (!response.ok) {
+        if (response.ok) {
             statusDiv.textContent = 'Система доступна';
-            statusDiv.className = 'green'; // Применяем зеленый цвет
+            statusDiv.className = 'green';
             statusDiv.classList.remove('blink');
             setTimeout(function() {
                 statusDiv.style.display = 'none';
                 document.getElementById('mainInterface').style.display = 'block';
-            }, 3000);  // Отображаем сообщение на 3 секунды, затем показываем интерфейс
+            }, 3000);
         } else {
             statusDiv.textContent = 'Система не доступна';
-            statusDiv.className = 'red blink'; // Применяем красный цвет и мерцание
+            statusDiv.className = 'red blink';
             document.getElementById('mainInterface').style.display = 'none';
         }
     } catch (error) {
         const statusDiv = document.getElementById('status');
         statusDiv.textContent = 'Ошибка связи с сервером';
-        statusDiv.className = 'red blink'; // Применяем красный цвет и мерцание
+        statusDiv.className = 'red blink';
         console.error('Ошибка при проверке статуса:', error);
     }
 }
