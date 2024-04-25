@@ -9,14 +9,16 @@
     <div id="container">
         <div id="status">Проверка состояния системы...</div>
         <div id="mainInterface" style="display: none;">
-            <h2>Загрузить изображение</h2>
-            <input type="file" id="imageInput" accept="image/*">
-            <button onclick="uploadImage()">Загрузить</button>
+            <h2>Фото</h2>
+            <input type="file" id="fileInput" style="display: none;" accept="image/*">
+            <div id="preview" style="margin-top: 20px;"></div>
+            <button id="sendButton" style="display: none;">Отправить</button>
+            <button id="customFileButton">Выбрать фото</button>
             <div id="uploadStatus"></div>
 
-            <h2>Веб-камера</h2>
-            <video autoplay></video>
+            <h2>Видео</h2>
             <button id="webcamButton" onclick="toggleWebcam()">Включить веб-камеру</button>
+            <video autoplay></video>
         </div>
     </div>
     <script src="scripts.js"></script>

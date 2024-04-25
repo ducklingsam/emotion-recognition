@@ -32,13 +32,33 @@ body, html {
     text-align: center;
 }
 
+
 button {
-    display: block;
-    margin: 20px auto;
     padding: 10px 20px;
-    font-size: 16px;
+    background-color: green;
+    color: white;
+    border: none;
+    border-radius: 20px;
     cursor: pointer;
+    font-size: 16px;
+    margin: 5px auto;
+    display: block;
+    font-family: 'LocalFont', sans-serif;
 }
+
+button:hover {
+    background-color: #45a049;
+}
+
+#preview img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    border-radius: 15px;
+    padding: 5px;
+    margin: 5px auto;
+}
+
 
 input[type="file"] {
     margin: 10px;
@@ -48,11 +68,10 @@ input[type="file"] {
 }
 
 .blink {
-    animation: blinker 1s linear infinite;
+    animation: blinker 1.5s linear infinite;
 }
 
 @keyframes blinker {
-    50% {
-        opacity: 0;
-    }
+    0%,100% { opacity: 0 }
+    50% { opacity: 1 }
 }

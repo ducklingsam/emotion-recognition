@@ -5,6 +5,33 @@ document.addEventListener('DOMContentLoaded', function() {
 
 let webcamActive = false;
 
+const fileInput = document.getElementById('fileInput');
+const customFileButton = document.getElementById('customFileButton');
+const sendButton = document.getElementById('sendButton');
+const preview = document.getElementById('preview');
+
+customFileButton.addEventListener('click', function() {
+    fileInput.click();
+});
+
+fileInput.addEventListener('change', function() {
+    if (fileInput.files.length > 0) {
+        sendButton.style.display = 'inline-block';
+
+        const file = fileInput.files[0];
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            preview.innerHTML = `<img src="${e.target.result}" style="max-width: 200px; max-height: 200px;" />`; // Создание превью изображения
+        };
+        reader.readAsDataURL(file);
+    }
+});
+
+sendButton.addEventListener('click', function() {
+    alert('Файл отправлен!');
+});
+
+
 async function checkSystemStatus() {
     try {
         const response = await fetch('/api/status');
@@ -18,7 +45,7 @@ async function checkSystemStatus() {
                 document.getElementById('mainInterface').style.display = 'block';
             }, 3000);
         } else {
-            statusDiv.textContent = 'Система не доступна';
+            statusDiv.textContent = 'Система недоступна';
             statusDiv.className = 'red blink';
             document.getElementById('mainInterface').style.display = 'none';
         }
