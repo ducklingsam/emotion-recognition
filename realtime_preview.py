@@ -1,22 +1,21 @@
+from flask import Flask, request, jsonify
+from flask_cors import CORS
 import cv2
-from keras.models import model_from_json
 import numpy as np
+from keras.models import model_from_json
 
+app = Flask(__name__)
+CORS(app, methods=['GET', 'POST'])
+
+# Загрузка модели и каскада Хаара один раз
 json_file = open("model/emotion_recognition.json", "r")
 model_json = json_file.read()
 json_file.close()
 model = model_from_json(model_json)
-
 model.load_weights("model/emotion_recognition.h5")
+
 haar_file = cv2.data.haarcascades + 'haarcascade_frontalface_default.xml'
 face_cascade = cv2.CascadeClassifier(haar_file)
-
-def extract_features(image):
-    feature = np.array(image)
-    feature = feature.reshape(1, 48, 48, 1)
-    return feature / 255.0
-
-webcam = cv2.VideoCapture(1)
 
 labels = {
     0: 'angry',
@@ -28,34 +27,37 @@ labels = {
     6: 'surprise'
 }
 
-if not webcam.isOpened():
-    print("Cannot open camera")
-    exit()
+def extract_features(image):
+    feature = np.array(image)
+    feature = feature.reshape(1, 48, 48, 1)
+    return feature / 255.0
 
-while True:
-    i, im = webcam.read()
-    
-    if not i:
-        print("Can't receive frame (stream end?). Exiting ...")
-        break
+@app.route('/api/status', methods=['GET'])
+def check_system_status():
+    if model and face_cascade:
+        return jsonify({'status': 'Система доступна'}), 200
+    else:
+        return jsonify({'status': 'Система недоступна'}), 503
 
-    gray = cv2.cvtColor(im, cv2.COLOR_BGR2GRAY)
-    faces = face_cascade.detectMultiScale(im, 1.3, 5)
-    
-    try: 
-        for (p, q, r, s) in faces:
-            image = gray[q:q+s, p:p+r]
-            cv2.rectangle(im, (p, q), (p+r, q+s), (255, 0, 0), 2)
-            image = cv2.resize(image, (48, 48))
-            img = extract_features(image)
-            pred = model.predict(img)
-            prediction_label = labels[pred.argmax()]
-            cv2.putText(im, '% s' % (prediction_label), (p-10, q-10), cv2.FONT_HERSHEY_COMPLEX_SMALL, 2, (0, 0, 255))
-        
-        cv2.imshow("Output", im)
-        
-        if cv2.waitKey(1) & 0xFF == 27:
-            break
-    
-    except cv2.error:
-        pass
+@app.route('/api/predict', methods=['POST'])
+def predict_emotion():
+    try:
+        file = request.files['image']
+        in_memory_file = np.frombuffer(file.read(), np.uint8)
+        image = cv2.imdecode(in_memory_file, cv2.IMREAD_GRAYSCALE)
+    except Exception as e:
+        return jsonify({'error': 'Не удалось обработать изображение', 'message': str(e)}), 400
+
+    faces = face_cascade.detectMultiScale(image, 1.3, 5)
+    emotions = []
+    for (p, q, r, s) in faces:
+        face_img = image[q:q + s, p:p + r]
+        face_img = cv2.resize(face_img, (48, 48))
+        img = extract_features(face_img)
+        pred = model.predict(img)
+        prediction_label = labels[pred.argmax()]
+        emotions.append({"emotion": prediction_label, "box": [int(p), int(q), int(r), int(s)]})
+    return jsonify(emotions)
+
+if __name__ == '__main__':
+    app.run(debug=True)
