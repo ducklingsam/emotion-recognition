@@ -7,18 +7,18 @@
 </head>
 <body>
     <div id="container">
-        <div id="status">Проверка состояния системы...</div>
+        <div id="status">Checking system health...</div>
         <div id="mainInterface" style="display: none;">
-            <h2>Фото</h2>
+            <h2>Photo</h2>
             <input type="file" id="fileInput" style="display: none;" accept="image/*">
             <div id="preview" style="margin-top: 20px;"></div>
             <div id="loader" class="loader" style="display: none;"></div>
             <div id="uploadStatus"></div>
-            <button id="sendButton" style="display: none;" onclick="uploadImage()">Отправить</button>
-            <button id="customFileButton">Выбрать фото</button>
+            <button id="sendButton" style="display: none;" onclick="uploadImage()">Send</button>
+            <button id="customFileButton">Choose Photo</button>
 
             <h2>Видео</h2>
-            <button id="webcamButton" onclick="toggleWebcam()">Включить веб-камеру</button>
+            <button id="webcamButton" onclick="toggleWebcam()">Toogle Webcam</button>
             <div id="emotionsContainer"></div>
             <video autoplay></video>
         </div>

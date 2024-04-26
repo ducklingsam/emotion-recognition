@@ -34,7 +34,7 @@ async function checkSystemStatus() {
         const data = await response.json();
         const statusDiv = document.getElementById('status');
         if (response.ok) {
-            statusDiv.textContent = data.status; // Используйте данные ответа сервера
+            statusDiv.textContent = data.status;
             statusDiv.className = 'green';
             statusDiv.classList.remove('blink');
             setTimeout(function() {
@@ -42,13 +42,13 @@ async function checkSystemStatus() {
                 document.getElementById('mainInterface').style.display = 'block';
             }, 3000);
         } else {
-            statusDiv.textContent = 'Система недоступна';
+            statusDiv.textContent = 'System is unavailable';
             statusDiv.className = 'red blink';
             document.getElementById('mainInterface').style.display = 'none';
         }
     } catch (error) {
         const statusDiv = document.getElementById('status');
-        statusDiv.textContent = 'Ошибка связи с сервером';
+        statusDiv.textContent = 'System is unavailable';
         statusDiv.className = 'red blink';
         console.error('Ошибка при проверке статуса:', error);
     }
@@ -85,15 +85,15 @@ async function uploadImage() {
             }
         } catch (error) {
             loader.style.display = 'none';
-            uploadStatusDiv.textContent = 'Ошибка загрузки';
+            uploadStatusDiv.textContent = 'Uploading error';
             uploadStatusDiv.style.display = 'block';
-            console.error('Ошибка при загрузке файла:', error);
+            console.error('Uploading error:', error);
             setTimeout(() => {
                 uploadStatusDiv.style.display = 'none';
             }, 15000);
         }
     } else {
-        alert('Пожалуйста, выберите файл изображения.');
+        alert('Choose file.');
     }
 }
 
@@ -119,9 +119,8 @@ async function toggleWebcam() {
         const stream = await navigator.mediaDevices.getUserMedia({ video: true });
         video.srcObject = stream;
         webcamActive = true;
-        button.textContent = 'Выключить веб-камеру';
+        button.textContent = 'Turn off Webcam';
 
-        // Начать отправку кадров на сервер каждые 1000 мс (1 секунда)
         const intervalId = setInterval(() => {
             sendFrameToServer(video);
         }, 1000);
@@ -136,7 +135,7 @@ async function toggleWebcam() {
         video.srcObject.getTracks().forEach(track => track.stop());
         video.srcObject = null;
         webcamActive = false;
-        button.textContent = 'Включить веб-камеру';
+        button.textContent = 'Turn on Webcam';
         emotionsContainer.style.display = 'none';
     }
 }
@@ -159,11 +158,11 @@ async function sendFrameToServer(video) {
             const data = await response.json();
             if (data && data.length > 0) {
                 const emotionsContainer = document.getElementById('emotionsContainer');
-                emotionsContainer.innerHTML = ''; // Очистить предыдущие эмоции
+                emotionsContainer.innerHTML = '';
                 data.forEach(detected => {
                     console.log('Detected emotion:', detected.emotion);
                     const emotionDiv = document.createElement('div');
-                    emotionDiv.textContent = `Emotion: ${detected.emotion}`;
+                    emotionDiv.textContent = `Seems like, you are ${detected.emotion}`;
                     emotionDiv.style.backgroundColor = 'white';
                     emotionDiv.style.color = 'black';
                     emotionDiv.style.padding = '10px';
