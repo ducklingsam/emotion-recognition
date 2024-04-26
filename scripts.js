@@ -30,10 +30,11 @@ fileInput.addEventListener('change', function() {
 
 async function checkSystemStatus() {
     try {
-        const response = await fetch('/api/status');
+        const response = await fetch('http://127.0.0.1:5000/api/status');
+        const data = await response.json();
         const statusDiv = document.getElementById('status');
         if (response.ok) {
-            statusDiv.textContent = 'Система доступна';
+            statusDiv.textContent = data.status; // Используйте данные ответа сервера
             statusDiv.className = 'green';
             statusDiv.classList.remove('blink');
             setTimeout(function() {
@@ -52,6 +53,9 @@ async function checkSystemStatus() {
         console.error('Ошибка при проверке статуса:', error);
     }
 }
+
+
+
 
 async function uploadImage() {
     const fileInput = document.getElementById('fileInput');
@@ -116,10 +120,61 @@ async function toggleWebcam() {
         video.srcObject = stream;
         webcamActive = true;
         button.textContent = 'Выключить веб-камеру';
+
+        // Начать отправку кадров на сервер каждые 1000 мс (1 секунда)
+        const intervalId = setInterval(() => {
+            sendFrameToServer(video);
+        }, 1000);
+
+        // Сохраняем ID интервала для возможности его остановки
+        video.setAttribute('data-interval-id', intervalId);
+        emotionsContainer.style.display = 'block';
     } else {
+        const intervalId = video.getAttribute('data-interval-id');
+        clearInterval(intervalId);  // Остановка отправки кадров
+
         video.srcObject.getTracks().forEach(track => track.stop());
         video.srcObject = null;
         webcamActive = false;
         button.textContent = 'Включить веб-камеру';
+        emotionsContainer.style.display = 'none';
     }
 }
+
+
+async function sendFrameToServer(video) {
+    const canvas = document.createElement('canvas');
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    canvas.toBlob(async blob => {
+        const formData = new FormData();
+        formData.append('image', blob);
+        try {
+            const response = await fetch('http://127.0.0.1:5000/api/predict', {
+                method: 'POST',
+                body: formData
+            });
+            const data = await response.json();
+            if (data && data.length > 0) {
+                const emotionsContainer = document.getElementById('emotionsContainer');
+                emotionsContainer.innerHTML = ''; // Очистить предыдущие эмоции
+                data.forEach(detected => {
+                    console.log('Detected emotion:', detected.emotion);
+                    const emotionDiv = document.createElement('div');
+                    emotionDiv.textContent = `Emotion: ${detected.emotion}`;
+                    emotionDiv.style.backgroundColor = 'white';
+                    emotionDiv.style.color = 'black';
+                    emotionDiv.style.padding = '10px';
+                    emotionDiv.style.marginTop = '10px';
+                    emotionsContainer.appendChild(emotionDiv);
+                });
+            }
+        } catch (error) {
+            console.error('Error sending frame:', error);
+        }
+    });
+}
+
+
