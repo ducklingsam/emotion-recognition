@@ -68,7 +68,7 @@ input[type="file"] {
 }
 
 #uploadStatus {
-    display: none; /* Прячем элемент пока не будет нужен */
+    display: none;
     padding: 10px;
     background-color: #FFF;
     color: #000;

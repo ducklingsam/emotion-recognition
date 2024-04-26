@@ -81,7 +81,7 @@ async function uploadImage() {
                     displayServerResponse(response);
                 }, 5000);
             } else {
-                throw new Error('Сервер вернул ошибку');
+                throw new Error('Server error');
             }
         } catch (error) {
             loader.style.display = 'none';
