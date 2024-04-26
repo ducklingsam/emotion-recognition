@@ -35,9 +35,9 @@ def extract_features(image):
 @app.route('/api/status', methods=['GET'])
 def check_system_status():
     if model and face_cascade:
-        return jsonify({'status': 'Система доступна'}), 200
+        return jsonify({'status': 'System is available'}), 200
     else:
-        return jsonify({'status': 'Система недоступна'}), 503
+        return jsonify({'status': 'System is unavailable'}), 503
 
 @app.route('/api/predict', methods=['POST'])
 def predict_emotion():
