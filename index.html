@@ -12,9 +12,10 @@
             <h2>Фото</h2>
             <input type="file" id="fileInput" style="display: none;" accept="image/*">
             <div id="preview" style="margin-top: 20px;"></div>
-            <button id="sendButton" style="display: none;">Отправить</button>
-            <button id="customFileButton">Выбрать фото</button>
+            <div id="loader" class="loader" style="display: none;"></div>
             <div id="uploadStatus"></div>
+            <button id="sendButton" style="display: none;" onclick="uploadImage()">Отправить</button>
+            <button id="customFileButton">Выбрать фото</button>
 
             <h2>Видео</h2>
             <button id="webcamButton" onclick="toggleWebcam()">Включить веб-камеру</button>

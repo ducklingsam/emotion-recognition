@@ -27,10 +27,6 @@ fileInput.addEventListener('change', function() {
     }
 });
 
-sendButton.addEventListener('click', function() {
-    alert('Файл отправлен!');
-});
-
 
 async function checkSystemStatus() {
     try {
@@ -58,23 +54,59 @@ async function checkSystemStatus() {
 }
 
 async function uploadImage() {
-    const fileInput = document.getElementById('imageInput');
+    const fileInput = document.getElementById('fileInput');
     const file = fileInput.files[0];
+    const uploadStatusDiv = document.getElementById('uploadStatus');
+    const loader = document.getElementById('loader');
+
     if (file) {
         const formData = new FormData();
         formData.append('image', file);
 
-        document.getElementById('uploadStatus').textContent = 'Загрузка...';
-        const response = await fetch('/api/upload', {
-            method: 'POST',
-            body: formData
-        });
-        const resultText = await response.text();
-        document.getElementById('uploadStatus').textContent = resultText;
+        loader.style.display = 'block';
+        uploadStatusDiv.style.display = 'none';
+
+        try {
+            const response = await fetch('/api/upload', {
+                method: 'POST',
+                body: formData
+            });
+            if (response.ok) {
+                setTimeout(() => {
+                    loader.style.display = 'none';
+                    displayServerResponse(response);
+                }, 5000);
+            } else {
+                throw new Error('Сервер вернул ошибку');
+            }
+        } catch (error) {
+            loader.style.display = 'none';
+            uploadStatusDiv.textContent = 'Ошибка загрузки';
+            uploadStatusDiv.style.display = 'block';
+            console.error('Ошибка при загрузке файла:', error);
+            setTimeout(() => {
+                uploadStatusDiv.style.display = 'none';
+            }, 15000);
+        }
     } else {
         alert('Пожалуйста, выберите файл изображения.');
     }
 }
+
+function displayServerResponse(response) {
+    response.text().then(text => {
+        const responseDiv = document.createElement('div');
+        responseDiv.textContent = text;
+        responseDiv.style.backgroundColor = 'white';
+        responseDiv.style.color = 'black';
+        responseDiv.style.padding = '10px';
+        responseDiv.style.margin = 'auto';
+        document.body.appendChild(responseDiv);
+    });
+}
+
+document.getElementById('sendButton').addEventListener('click', uploadImage);
+
 
 async function toggleWebcam() {
     const video = document.querySelector('video');
