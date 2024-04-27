@@ -7,7 +7,6 @@ from keras.models import model_from_json
 app = Flask(__name__)
 CORS(app, methods=['GET', 'POST'])
 
-# Загрузка модели и каскада Хаара один раз
 json_file = open("model/emotion_recognition.json", "r")
 model_json = json_file.read()
 json_file.close()
