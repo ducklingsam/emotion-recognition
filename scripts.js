@@ -60,52 +60,42 @@ async function checkSystemStatus() {
 async function uploadImage() {
     const fileInput = document.getElementById('fileInput');
     const file = fileInput.files[0];
-    const uploadStatusDiv = document.getElementById('uploadStatus');
+    const formData = new FormData();
+    formData.append('image', file);
+
     const loader = document.getElementById('loader');
+    loader.style.display = 'block';
 
-    if (file) {
-        const formData = new FormData();
-        formData.append('image', file);
-
-        loader.style.display = 'block';
-        uploadStatusDiv.style.display = 'none';
-
-        try {
-            const response = await fetch('/api/upload', {
-                method: 'POST',
-                body: formData
-            });
-            if (response.ok) {
-                setTimeout(() => {
-                    loader.style.display = 'none';
-                    displayServerResponse(response);
-                }, 5000);
-            } else {
-                throw new Error('Server error');
-            }
-        } catch (error) {
-            loader.style.display = 'none';
-            uploadStatusDiv.textContent = 'Uploading error';
-            uploadStatusDiv.style.display = 'block';
-            console.error('Uploading error:', error);
-            setTimeout(() => {
-                uploadStatusDiv.style.display = 'none';
-            }, 15000);
+    try {
+        const response = await fetch('http://127.0.0.1:5000/api/predict', {
+            method: 'POST',
+            body: formData
+        });
+        if (response.ok) {
+            const data = await response.json();
+            displayEmotions(data);
+        } else {
+            console.error('Ошибка при отправке файла');
         }
-    } else {
-        alert('Choose file.');
+    } catch (error) {
+        console.error('Ошибка при отправке файла:', error);
+    } finally {
+        loader.style.display = 'none';
     }
 }
 
-function displayServerResponse(response) {
-    response.text().then(text => {
-        const responseDiv = document.createElement('div');
-        responseDiv.textContent = text;
-        responseDiv.style.backgroundColor = 'white';
-        responseDiv.style.color = 'black';
-        responseDiv.style.padding = '10px';
-        responseDiv.style.margin = 'auto';
-        document.body.appendChild(responseDiv);
+function displayEmotions(emotions) {
+    const emotionsContainerPhoto = document.getElementById('emotionsContainerPhoto');
+    emotionsContainerPhoto.innerHTML = '';
+
+    emotions.forEach(emotion => {
+        const emotionDiv = document.createElement('div');
+        emotionDiv.textContent = `Emotion: ${emotion.emotion}`;
+        emotionDiv.style.backgroundColor = 'white';
+        emotionDiv.style.color = 'black';
+        emotionDiv.style.padding = '10px';
+        emotionDiv.style.marginTop = '10px';
+        emotionsContainerPhoto.appendChild(emotionDiv);
     });
 }
 
@@ -125,18 +115,17 @@ async function toggleWebcam() {
             sendFrameToServer(video);
         }, 1000);
 
-        // Сохраняем ID интервала для возможности его остановки
         video.setAttribute('data-interval-id', intervalId);
-        emotionsContainer.style.display = 'block';
+        emotionsContainerVideo.style.display = 'block';
     } else {
         const intervalId = video.getAttribute('data-interval-id');
-        clearInterval(intervalId);  // Остановка отправки кадров
+        clearInterval(intervalId);
 
         video.srcObject.getTracks().forEach(track => track.stop());
         video.srcObject = null;
         webcamActive = false;
         button.textContent = 'Turn on Webcam';
-        emotionsContainer.style.display = 'none';
+        emotionsContainerVideo.style.display = 'none';
     }
 }
 
@@ -157,8 +146,8 @@ async function sendFrameToServer(video) {
             });
             const data = await response.json();
             if (data && data.length > 0) {
-                const emotionsContainer = document.getElementById('emotionsContainer');
-                emotionsContainer.innerHTML = '';
+                const emotionsContainerVideo = document.getElementById('emotionsContainerVideo');
+                emotionsContainerVideo.innerHTML = '';
                 data.forEach(detected => {
                     console.log('Detected emotion:', detected.emotion);
                     const emotionDiv = document.createElement('div');
@@ -167,7 +156,7 @@ async function sendFrameToServer(video) {
                     emotionDiv.style.color = 'black';
                     emotionDiv.style.padding = '10px';
                     emotionDiv.style.marginTop = '10px';
-                    emotionsContainer.appendChild(emotionDiv);
+                    emotionsContainerVideo.appendChild(emotionDiv);
                 });
             }
         } catch (error) {
