@@ -26,10 +26,12 @@ labels = {
     6: 'surprise'
 }
 
+
 def extract_features(image):
     feature = np.array(image)
     feature = feature.reshape(1, 48, 48, 1)
     return feature / 255.0
+
 
 @app.route('/api/status', methods=['GET'])
 def check_system_status():
@@ -38,6 +40,7 @@ def check_system_status():
     else:
         return jsonify({'status': 'System is unavailable'}), 503
 
+
 @app.route('/api/predict', methods=['POST'])
 def predict_emotion():
     try:
@@ -45,7 +48,7 @@ def predict_emotion():
         in_memory_file = np.frombuffer(file.read(), np.uint8)
         image = cv2.imdecode(in_memory_file, cv2.IMREAD_GRAYSCALE)
     except Exception as e:
-        return jsonify({'error': 'Не удалось обработать изображение', 'message': str(e)}), 400
+        return jsonify({'error': 'Failed to process the image', 'message': str(e)}), 400
 
     faces = face_cascade.detectMultiScale(image, 1.3, 5)
     emotions = []
@@ -57,6 +60,7 @@ def predict_emotion():
         prediction_label = labels[pred.argmax()]
         emotions.append({"emotion": prediction_label, "box": [int(p), int(q), int(r), int(s)]})
     return jsonify(emotions)
+
 
 if __name__ == '__main__':
     app.run(debug=True)
