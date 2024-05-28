@@ -3,10 +3,22 @@ from flask_cors import CORS
 import cv2
 import numpy as np
 from keras.models import model_from_json
+import psycopg2
+import os
+from dotenv import load_dotenv
 
 app = Flask(__name__)
 CORS(app, methods=['GET', 'POST'])
 
+load_dotenv()
+
+DB_NAME = os.getenv("DB_NAME")
+DB_USER = os.getenv("DB_USER")
+DB_PASSWORD = os.getenv("DB_PASSWORD")
+DB_HOST = os.getenv("DB_HOST")
+DB_PORT = os.getenv("DB_PORT")
+
+# Загрузка модели
 json_file = open("model/emotion_recognition.json", "r")
 model_json = json_file.read()
 json_file.close()
@@ -26,12 +38,31 @@ labels = {
     6: 'surprise'
 }
 
-
 def extract_features(image):
     feature = np.array(image)
     feature = feature.reshape(1, 48, 48, 1)
     return feature / 255.0
 
+def get_user_by_api_key(api_key):
+    conn = psycopg2.connect(
+        dbname=DB_NAME,
+        user=DB_USER,
+        password=DB_PASSWORD,
+        host=DB_HOST,
+        port=DB_PORT
+    )
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM users WHERE api_key=%s", (api_key,))
+    user = cur.fetchone()
+    cur.close()
+    conn.close()
+    return user
+
+def is_request_from_internal_server():
+    referer = request.headers.get("Referer")
+    if referer and ("localhost:63342" in referer or "your-internal-server-domain" in referer):
+        return True
+    return False
 
 @app.route('/api/status', methods=['GET'])
 def check_system_status():
@@ -40,9 +71,13 @@ def check_system_status():
     else:
         return jsonify({'status': 'System is unavailable'}), 503
 
-
 @app.route('/api/predict', methods=['POST'])
 def predict_emotion():
+    if not is_request_from_internal_server():
+        api_key = request.headers.get("x-api-key")
+        if not api_key or not get_user_by_api_key(api_key):
+            return jsonify({'error': 'Unauthorized'}), 401
+
     try:
         file = request.files['image']
         in_memory_file = np.frombuffer(file.read(), np.uint8)
@@ -60,7 +95,6 @@ def predict_emotion():
         prediction_label = labels[pred.argmax()]
         emotions.append({"emotion": prediction_label, "box": [int(p), int(q), int(r), int(s)]})
     return jsonify(emotions)
-
 
 if __name__ == '__main__':
     app.run(debug=True)
