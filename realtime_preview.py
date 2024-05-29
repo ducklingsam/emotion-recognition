@@ -8,7 +8,7 @@ import os
 from dotenv import load_dotenv
 
 app = Flask(__name__)
-CORS(app, resources={r"/api/*": {"origins": "*"}})  # Enable CORS for all origins for /api/*
+CORS(app, resources={r"/*": {"origins": "*"}})  # Allow CORS for all routes and all origins
 app.config['CORS_HEADERS'] = 'Content-Type'
 
 load_dotenv()
@@ -77,8 +77,15 @@ def check_system_status():
         return jsonify({'status': 'System is unavailable'}), 503
 
 
-@app.route('/api/predict', methods=['POST'])
+@app.route('/api/predict', methods=['POST', 'OPTIONS'])
 def predict_emotion():
+    if request.method == 'OPTIONS':
+        response = jsonify({'status': 'ok'})
+        response.headers.add("Access-Control-Allow-Origin", "*")
+        response.headers.add("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+        response.headers.add("Access-Control-Allow-Headers", "Content-Type,Authorization")
+        return response
+
     if not is_request_from_internal_server():
         api_key = request.headers.get("x-api-key")
         if not api_key or not get_user_by_api_key(api_key):
@@ -106,16 +113,6 @@ def predict_emotion():
     response.headers.add("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
     response.headers.add("Access-Control-Allow-Headers", "Content-Type,Authorization")
     return response
-
-
-@app.route('/api/predict', methods=['OPTIONS'])
-def predict_options():
-    response = jsonify({'status': 'ok'})
-    response.headers.add("Access-Control-Allow-Origin", "*")
-    response.headers.add("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-    response.headers.add("Access-Control-Allow-Headers", "Content-Type,Authorization")
-    return response
-
 
 
 if __name__ == '__main__':

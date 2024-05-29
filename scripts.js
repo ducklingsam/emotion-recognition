@@ -72,18 +72,21 @@ async function uploadImage() {
             method: 'POST',
             body: formData
         });
+        console.log('Response:', response);
         if (response.ok) {
             const data = await response.json();
             displayEmotions(data);
         } else {
-            console.error('Ошибка при отправке файла');
+            const errorText = await response.text();
+            console.error('Server returned an error:', response.status, response.statusText, errorText);
         }
     } catch (error) {
-        console.error('Ошибка при отправке файла:', error);
+        console.error('Error during file upload:', error);
     } finally {
         loader.style.display = 'none';
     }
 }
+
 
 function displayEmotions(emotions) {
     const emotionsContainerPhoto = document.getElementById('emotionsContainerPhoto');
