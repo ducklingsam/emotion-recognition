@@ -68,7 +68,7 @@ async function uploadImage() {
     loader.style.display = 'block';
 
     try {
-        const response = await fetch('https://emotion-recognition-0jl7.onrender.com/api/predict', {
+        const response = await fetch('http://emotion-recognition-0jl7.onrender.com/api/predict', {
             method: 'POST',
             body: formData
         });
@@ -142,7 +142,7 @@ async function sendFrameToServer(video) {
         const formData = new FormData();
         formData.append('image', blob);
         try {
-            const response = await fetch('https://emotion-recognition-0jl7.onrender.com/api/predict', {
+            const response = await fetch('http://emotion-recognition-0jl7.onrender.com/api/predict', {
                 method: 'POST',
                 body: formData
             });
