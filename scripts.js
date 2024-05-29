@@ -1,4 +1,3 @@
-// scripts.js
 document.addEventListener('DOMContentLoaded', function() {
     checkSystemStatus();
 });
@@ -27,13 +26,18 @@ fileInput.addEventListener('change', function() {
     }
 });
 
-
 async function checkSystemStatus() {
+    const timeoutPromise = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('Request timed out')), 120000) // 2 minutes timeout
+    );
+
+    const fetchPromise = fetch('https://emotion-recognition-0jl7.onrender.com/api/status')
+        .then(response => response.json());
+
     try {
-        const response = await fetch('https://emotion-recognition-0jl7.onrender.com/api/status');
-        const data = await response.json();
+        const data = await Promise.race([timeoutPromise, fetchPromise]);
         const statusDiv = document.getElementById('status');
-        if (response.ok) {
+        if (data.status) {
             statusDiv.textContent = data.status;
             statusDiv.className = 'green';
             statusDiv.classList.remove('blink');
@@ -48,14 +52,11 @@ async function checkSystemStatus() {
         }
     } catch (error) {
         const statusDiv = document.getElementById('status');
-        statusDiv.textContent = 'System is unavailable';
-        statusDiv.className = 'red blink';
-        console.error('Ошибка при проверке статуса:', error);
+        statusDiv.textContent = 'We have updating in progress, try again in 5 min';
+        statusDiv.className = 'white blink';
+        console.error('Error checking system status:', error);
     }
 }
-
-
-
 
 async function uploadImage() {
     const fileInput = document.getElementById('fileInput');
@@ -101,7 +102,6 @@ function displayEmotions(emotions) {
 
 document.getElementById('sendButton').addEventListener('click', uploadImage);
 
-
 async function toggleWebcam() {
     const video = document.querySelector('video');
     const button = document.getElementById('webcamButton');
@@ -128,7 +128,6 @@ async function toggleWebcam() {
         emotionsContainerVideo.style.display = 'none';
     }
 }
-
 
 async function sendFrameToServer(video) {
     const canvas = document.createElement('canvas');
@@ -164,5 +163,3 @@ async function sendFrameToServer(video) {
         }
     });
 }
-
-
