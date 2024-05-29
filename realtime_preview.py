@@ -38,10 +38,12 @@ labels = {
     6: 'surprise'
 }
 
+
 def extract_features(image):
     feature = np.array(image)
     feature = feature.reshape(1, 48, 48, 1)
     return feature / 255.0
+
 
 def get_user_by_api_key(api_key):
     conn = psycopg2.connect(
@@ -58,11 +60,13 @@ def get_user_by_api_key(api_key):
     conn.close()
     return user
 
+
 def is_request_from_internal_server():
     referer = request.headers.get("Referer")
-    if referer and ("localhost:63342" in referer or "your-internal-server-domain" in referer):
+    if referer and ("localhost:63342" in referer or "emotion-recognition-0jl7.onrender.com" in referer):
         return True
     return False
+
 
 @app.route('/api/status', methods=['GET'])
 def check_system_status():
@@ -70,6 +74,7 @@ def check_system_status():
         return jsonify({'status': 'System is available'}), 200
     else:
         return jsonify({'status': 'System is unavailable'}), 503
+
 
 @app.route('/api/predict', methods=['POST'])
 def predict_emotion():
@@ -95,6 +100,7 @@ def predict_emotion():
         prediction_label = labels[pred.argmax()]
         emotions.append({"emotion": prediction_label, "box": [int(p), int(q), int(r), int(s)]})
     return jsonify(emotions)
+
 
 if __name__ == '__main__':
     app.run(debug=True)

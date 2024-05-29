@@ -30,7 +30,7 @@ fileInput.addEventListener('change', function() {
 
 async function checkSystemStatus() {
     try {
-        const response = await fetch('http://127.0.0.1:5000/api/status');
+        const response = await fetch('https://emotion-recognition-0jl7.onrender.com/api/status');
         const data = await response.json();
         const statusDiv = document.getElementById('status');
         if (response.ok) {
@@ -67,7 +67,7 @@ async function uploadImage() {
     loader.style.display = 'block';
 
     try {
-        const response = await fetch('http://127.0.0.1:5000/api/predict', {
+        const response = await fetch('https://emotion-recognition-0jl7.onrender.com/api/predict', {
             method: 'POST',
             body: formData
         });
@@ -140,7 +140,7 @@ async function sendFrameToServer(video) {
         const formData = new FormData();
         formData.append('image', blob);
         try {
-            const response = await fetch('http://127.0.0.1:5000/api/predict', {
+            const response = await fetch('https://emotion-recognition-0jl7.onrender.com/api/predict', {
                 method: 'POST',
                 body: formData
             });
