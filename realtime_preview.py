@@ -63,7 +63,7 @@ def get_user_by_api_key(api_key):
 
 def is_request_from_internal_server():
     referer = request.headers.get("Referer")
-    if referer and ("localhost:63342" in referer or "emotion-recognition-0jl7.onrender.com" in referer):
+    if referer and ("localhost:63342" in referer or "emotion-recognition-1.onrender.com" in referer):
         return True
     return False
 
