@@ -86,33 +86,53 @@ def predict_emotion():
         response.headers.add("Access-Control-Allow-Headers", "Content-Type,Authorization")
         return response
 
-    if not is_request_from_internal_server():
-        api_key = request.headers.get("x-api-key")
-        if not api_key or not get_user_by_api_key(api_key):
-            return jsonify({'error': 'Unauthorized'}), 401
-
     try:
         file = request.files['image']
-        in_memory_file = np.frombuffer(file.read(), np.uint8)
-        image = cv2.imdecode(in_memory_file, cv2.IMREAD_GRAYSCALE)
+        if not file:
+            return jsonify({'error': 'No file uploaded'}), 400
+
+        # Simulate processing
+        print("File received")
+
+        return jsonify({'status': 'File received successfully'}), 200
     except Exception as e:
-        return jsonify({'error': 'Failed to process the image', 'message': str(e)}), 400
-
-    faces = face_cascade.detectMultiScale(image, 1.3, 5)
-    emotions = []
-    for (p, q, r, s) in faces:
-        face_img = image[q:q + s, p:p + r]
-        face_img = cv2.resize(face_img, (48, 48))
-        img = extract_features(face_img)
-        pred = model.predict(img)
-        prediction_label = labels[pred.argmax()]
-        emotions.append({"emotion": prediction_label, "box": [int(p), int(q), int(r), int(s)]})
-
-    response = jsonify(emotions)
-    response.headers.add("Access-Control-Allow-Origin", "*")
-    response.headers.add("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-    response.headers.add("Access-Control-Allow-Headers", "Content-Type,Authorization")
-    return response
+        print(f"Error processing the image: {str(e)}")
+        return jsonify({'error': 'Failed to process the image', 'message': str(e)}), 500
+# def predict_emotion():
+#     if request.method == 'OPTIONS':
+#         response = jsonify({'status': 'ok'})
+#         response.headers.add("Access-Control-Allow-Origin", "*")
+#         response.headers.add("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+#         response.headers.add("Access-Control-Allow-Headers", "Content-Type,Authorization")
+#         return response
+#
+#     if not is_request_from_internal_server():
+#         api_key = request.headers.get("x-api-key")
+#         if not api_key or not get_user_by_api_key(api_key):
+#             return jsonify({'error': 'Unauthorized'}), 401
+#
+#     try:
+#         file = request.files['image']
+#         in_memory_file = np.frombuffer(file.read(), np.uint8)
+#         image = cv2.imdecode(in_memory_file, cv2.IMREAD_GRAYSCALE)
+#     except Exception as e:
+#         return jsonify({'error': 'Failed to process the image', 'message': str(e)}), 400
+#
+#     faces = face_cascade.detectMultiScale(image, 1.3, 5)
+#     emotions = []
+#     for (p, q, r, s) in faces:
+#         face_img = image[q:q + s, p:p + r]
+#         face_img = cv2.resize(face_img, (48, 48))
+#         img = extract_features(face_img)
+#         pred = model.predict(img)
+#         prediction_label = labels[pred.argmax()]
+#         emotions.append({"emotion": prediction_label, "box": [int(p), int(q), int(r), int(s)]})
+#
+#     response = jsonify(emotions)
+#     response.headers.add("Access-Control-Allow-Origin", "*")
+#     response.headers.add("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+#     response.headers.add("Access-Control-Allow-Headers", "Content-Type,Authorization")
+#     return response
 
 
 if __name__ == '__main__':

@@ -68,14 +68,13 @@ async function uploadImage() {
     loader.style.display = 'block';
 
     try {
-        const response = await fetch('http://emotion-recognition-0jl7.onrender.com/api/predict', {
+        const response = await fetch('https://emotion-recognition-0jl7.onrender.com/api/predict', {
             method: 'POST',
             body: formData
         });
-        console.log('Response:', response);
         if (response.ok) {
             const data = await response.json();
-            displayEmotions(data);
+            console.log('Response data:', data);
         } else {
             const errorText = await response.text();
             console.error('Server returned an error:', response.status, response.statusText, errorText);
@@ -86,6 +85,36 @@ async function uploadImage() {
         loader.style.display = 'none';
     }
 }
+
+
+// async function uploadImage() {
+//     const fileInput = document.getElementById('fileInput');
+//     const file = fileInput.files[0];
+//     const formData = new FormData();
+//     formData.append('image', file);
+//
+//     const loader = document.getElementById('loader');
+//     loader.style.display = 'block';
+//
+//     try {
+//         const response = await fetch('http://emotion-recognition-0jl7.onrender.com/api/predict', {
+//             method: 'POST',
+//             body: formData
+//         });
+//         console.log('Response:', response);
+//         if (response.ok) {
+//             const data = await response.json();
+//             displayEmotions(data);
+//         } else {
+//             const errorText = await response.text();
+//             console.error('Server returned an error:', response.status, response.statusText, errorText);
+//         }
+//     } catch (error) {
+//         console.error('Error during file upload:', error);
+//     } finally {
+//         loader.style.display = 'none';
+//     }
+// }
 
 
 function displayEmotions(emotions) {
