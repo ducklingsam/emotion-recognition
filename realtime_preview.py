@@ -3,7 +3,7 @@ from flask_cors import CORS
 import cv2
 import numpy as np
 from keras.models import model_from_json
-import os
+import logging
 from dotenv import load_dotenv
 
 app = Flask(__name__)
@@ -61,17 +61,35 @@ def predict_emotion():
         # Image decoding
         in_memory_file = np.frombuffer(file.read(), np.uint8)
         image = cv2.imdecode(in_memory_file, cv2.IMREAD_GRAYSCALE)
-        print("Image decoded successfully")
+        logging.info("Image decoded successfully")
 
         # Face detection
         faces = face_cascade.detectMultiScale(image, 1.3, 5)
         if len(faces) == 0:
             return jsonify({'status': 'No faces detected'}), 200
-        print("Faces detected:", len(faces))
+        logging.info(f"Faces detected:{len(faces)}")
 
-        return jsonify({'status': 'Faces detected', 'count': len(faces)}), 200
+        # Emotion prediction
+        emotions = []
+        for (p, q, r, s) in faces:
+            face_img = image[q:q + s, p:p + r]
+            face_img = cv2.resize(face_img, (48, 48))
+            img = extract_features(face_img)
+            pred = model.predict(img)
+            prediction_label = labels[pred.argmax()]
+            emotions.append({"emotion": prediction_label, "box": [int(p), int(q), int(r), int(s)]})
+
+        # Log the emotions detected
+        logging.info(f"Emotions detected: {emotions}")
+
+        # Send the response
+        response = jsonify(emotions)
+        response.headers.add("Access-Control-Allow-Origin", "*")
+        response.headers.add("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+        response.headers.add("Access-Control-Allow-Headers", "Content-Type,Authorization")
+        return response
     except Exception as e:
-        print(f"Error processing the image: {str(e)}")
+        logging.info(f"Error processing the image: {str(e)}")
         return jsonify({'error': 'Failed to process the image', 'message': str(e)}), 500
 
 

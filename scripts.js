@@ -75,6 +75,7 @@ async function uploadImage() {
         if (response.ok) {
             const data = await response.json();
             console.log('Response data:', data);
+            displayEmotions(data);
         } else {
             const errorText = await response.text();
             console.error('Server returned an error:', response.status, response.statusText, errorText);
@@ -85,6 +86,22 @@ async function uploadImage() {
         loader.style.display = 'none';
     }
 }
+
+function displayEmotions(emotions) {
+    const emotionsContainerPhoto = document.getElementById('emotionsContainerPhoto');
+    emotionsContainerPhoto.innerHTML = '';
+
+    emotions.forEach(emotion => {
+        const emotionDiv = document.createElement('div');
+        emotionDiv.textContent = `Emotion: ${emotion.emotion}`;
+        emotionDiv.style.backgroundColor = 'white';
+        emotionDiv.style.color = 'black';
+        emotionDiv.style.padding = '10px';
+        emotionDiv.style.marginTop = '10px';
+        emotionsContainerPhoto.appendChild(emotionDiv);
+    });
+}
+
 
 
 // async function uploadImage() {
@@ -117,20 +134,20 @@ async function uploadImage() {
 // }
 
 
-function displayEmotions(emotions) {
-    const emotionsContainerPhoto = document.getElementById('emotionsContainerPhoto');
-    emotionsContainerPhoto.innerHTML = '';
-
-    emotions.forEach(emotion => {
-        const emotionDiv = document.createElement('div');
-        emotionDiv.textContent = `Emotion: ${emotion.emotion}`;
-        emotionDiv.style.backgroundColor = 'white';
-        emotionDiv.style.color = 'black';
-        emotionDiv.style.padding = '10px';
-        emotionDiv.style.marginTop = '10px';
-        emotionsContainerPhoto.appendChild(emotionDiv);
-    });
-}
+// function displayEmotions(emotions) {
+//     const emotionsContainerPhoto = document.getElementById('emotionsContainerPhoto');
+//     emotionsContainerPhoto.innerHTML = '';
+//
+//     emotions.forEach(emotion => {
+//         const emotionDiv = document.createElement('div');
+//         emotionDiv.textContent = `Emotion: ${emotion.emotion}`;
+//         emotionDiv.style.backgroundColor = 'white';
+//         emotionDiv.style.color = 'black';
+//         emotionDiv.style.padding = '10px';
+//         emotionDiv.style.marginTop = '10px';
+//         emotionsContainerPhoto.appendChild(emotionDiv);
+//     });
+// }
 
 document.getElementById('sendButton').addEventListener('click', uploadImage);
 
