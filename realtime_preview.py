@@ -63,7 +63,13 @@ def predict_emotion():
         image = cv2.imdecode(in_memory_file, cv2.IMREAD_GRAYSCALE)
         print("Image decoded successfully")
 
-        return jsonify({'status': 'Image decoded successfully'}), 200
+        # Face detection
+        faces = face_cascade.detectMultiScale(image, 1.3, 5)
+        if len(faces) == 0:
+            return jsonify({'status': 'No faces detected'}), 200
+        print("Faces detected:", len(faces))
+
+        return jsonify({'status': 'Faces detected', 'count': len(faces)}), 200
     except Exception as e:
         print(f"Error processing the image: {str(e)}")
         return jsonify({'error': 'Failed to process the image', 'message': str(e)}), 500
