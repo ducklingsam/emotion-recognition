@@ -9,6 +9,7 @@ from dotenv import load_dotenv
 
 app = Flask(__name__)
 CORS(app, methods=['GET', 'POST'])
+app.config['CORS_HEADERS'] = 'Content-Type'
 
 load_dotenv()
 
@@ -99,7 +100,7 @@ def predict_emotion():
         pred = model.predict(img)
         prediction_label = labels[pred.argmax()]
         emotions.append({"emotion": prediction_label, "box": [int(p), int(q), int(r), int(s)]})
-    return jsonify(emotions)
+    return jsonify(emotions).headers.add("Access-Control-Allow-Origin", "*")
 
 
 if __name__ == '__main__':
