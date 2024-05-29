@@ -8,7 +8,7 @@ import os
 from dotenv import load_dotenv
 
 app = Flask(__name__)
-CORS(app, resources={r"/api/*": {"origins": "*"}})
+CORS(app, resources={r"/api/*": {"origins": "*"}})  # Enable CORS for all origins for /api/*
 app.config['CORS_HEADERS'] = 'Content-Type'
 
 load_dotenv()
@@ -19,6 +19,7 @@ DB_PASSWORD = os.getenv("DB_PASSWORD")
 DB_HOST = os.getenv("DB_HOST")
 DB_PORT = os.getenv("DB_PORT")
 
+# Load model
 json_file = open("model/emotion_recognition.json", "r")
 model_json = json_file.read()
 json_file.close()
@@ -102,7 +103,19 @@ def predict_emotion():
 
     response = jsonify(emotions)
     response.headers.add("Access-Control-Allow-Origin", "*")
+    response.headers.add("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+    response.headers.add("Access-Control-Allow-Headers", "Content-Type,Authorization")
     return response
+
+
+@app.route('/api/predict', methods=['OPTIONS'])
+def predict_options():
+    response = jsonify({'status': 'ok'})
+    response.headers.add("Access-Control-Allow-Origin", "*")
+    response.headers.add("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+    response.headers.add("Access-Control-Allow-Headers", "Content-Type,Authorization")
+    return response
+
 
 
 if __name__ == '__main__':
