@@ -3,7 +3,7 @@ from flask_cors import CORS
 import cv2
 import numpy as np
 from keras.models import model_from_json
-import logging
+import os
 from dotenv import load_dotenv
 
 app = Flask(__name__)
@@ -11,6 +11,12 @@ CORS(app, resources={r"/api/*": {"origins": "*"}})
 app.config['CORS_HEADERS'] = 'Content-Type'
 
 load_dotenv()
+
+DB_NAME = os.getenv("DB_NAME")
+DB_USER = os.getenv("DB_USER")
+DB_PASSWORD = os.getenv("DB_PASSWORD")
+DB_HOST = os.getenv("DB_HOST")
+DB_PORT = os.getenv("DB_PORT")
 
 # Load model
 json_file = open("model/emotion_recognition.json", "r")
@@ -61,13 +67,13 @@ def predict_emotion():
         # Image decoding
         in_memory_file = np.frombuffer(file.read(), np.uint8)
         image = cv2.imdecode(in_memory_file, cv2.IMREAD_GRAYSCALE)
-        logging.info("Image decoded successfully")
+        print("Image decoded successfully")
 
         # Face detection
         faces = face_cascade.detectMultiScale(image, 1.3, 5)
         if len(faces) == 0:
             return jsonify({'status': 'No faces detected'}), 200
-        logging.info(f"Faces detected:{len(faces)}")
+        print(f"Faces detected:{len(faces)}")
 
         # Emotion prediction
         emotions = []
@@ -80,7 +86,7 @@ def predict_emotion():
             emotions.append({"emotion": prediction_label, "box": [int(p), int(q), int(r), int(s)]})
 
         # Log the emotions detected
-        logging.info(f"Emotions detected: {emotions}")
+        print(f"Emotions detected: {emotions}")
 
         # Send the response
         response = jsonify(emotions)
@@ -89,7 +95,7 @@ def predict_emotion():
         response.headers.add("Access-Control-Allow-Headers", "Content-Type,Authorization")
         return response
     except Exception as e:
-        logging.info(f"Error processing the image: {str(e)}")
+        print(f"Error processing the image: {str(e)}")
         return jsonify({'error': 'Failed to process the image', 'message': str(e)}), 500
 
 
