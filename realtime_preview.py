@@ -8,6 +8,7 @@ from dotenv import load_dotenv
 from flask_httpauth import HTTPBasicAuth
 from werkzeug.security import check_password_hash, generate_password_hash
 import psycopg2
+from datetime import datetime, timedelta
 
 app = Flask(__name__)
 CORS(app, resources={r"/api/*": {"origins": "*"}})
@@ -35,6 +36,15 @@ def get_db_connection():
     return conn
 
 
+def update_user_info(username, user_info):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("UPDATE users SET user_info = %s WHERE username = %s", (user_info, username))
+    conn.commit()
+    cursor.close()
+    conn.close()
+
+
 @auth.verify_password
 def verify_password(username, password):
     origin = request.headers.get('Origin')
@@ -45,13 +55,36 @@ def verify_password(username, password):
 
     conn = get_db_connection()
     cursor = conn.cursor()
-    cursor.execute("SELECT password FROM users WHERE username = %s", (username,))
+    cursor.execute("SELECT password, user_info FROM users WHERE username = %s", (username,))
     user = cursor.fetchone()
     cursor.close()
     conn.close()
 
-    if user and check_password_hash(user[0], password):
-        return username
+    if user:
+        stored_password, user_info = user
+        user_info = user_info or {}
+        is_first_week = user_info.get('is_first_week', False)
+        purchase_time_str = user_info.get('purchase', None)
+        if purchase_time_str:
+            purchase_time = datetime.fromisoformat(purchase_time_str)
+            current_time = datetime.now()
+
+            if is_first_week:
+                if (current_time - purchase_time).days > 7:
+                    is_first_week = False
+                    user_info['is_first_week'] = False
+                    update_user_info(username, user_info)
+                else:
+                    if check_password_hash(stored_password, password):
+                        return username
+            else:
+                if (current_time - purchase_time).days > 30:
+                    return None
+                else:
+                    if check_password_hash(stored_password, password):
+                        return username
+
+    return None
 
 
 # Load model
