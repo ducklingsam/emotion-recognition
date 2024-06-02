@@ -1,0 +1,101 @@
+openapi: 3.0.1
+info:
+  title: Emotion Recognition API
+  description: API for predicting emotions from images
+  version: 1.0.0
+servers:
+  - url: http://localhost:5000
+paths:
+  /api/status:
+    get:
+      summary: Check system status
+      responses:
+        '200':
+          description: System status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: System is available
+                  error:
+                    type: string
+  /api/predict:
+    post:
+      summary: Predict emotion from an image
+      security:
+        - basicAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                image:
+                  type: string
+                  format: binary
+                  description: Image file for emotion prediction
+      responses:
+        '200':
+          description: Emotion prediction result
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    emotion:
+                      type: string
+                      description: Predicted emotion
+                      example: happy
+                    box:
+                      type: array
+                      description: Bounding box of the detected face
+                      items:
+                        type: integer
+                      example: [100, 100, 50, 50]
+        '400':
+          description: No file uploaded
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: No file uploaded
+        '500':
+          description: Failed to process the image
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Failed to process the image
+                  message:
+                    type: string
+                    example: "Error processing the image: ..."
+    options:
+      summary: CORS Preflight
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+components:
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
