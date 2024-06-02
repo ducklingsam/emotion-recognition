@@ -1,10 +1,10 @@
 openapi: 3.0.1
 info:
   title: Emotion Recognition API
-  description: API for predicting emotions from images
+  description: "API for predicting emotions from photos and videos. Done by 3 year HSE University students: Bozhenov Oleg, Chizhov Stepan, Meladze Evgeny. 2024 "
   version: 1.0.0
 servers:
-  - url: http://localhost:5000
+  - url: https://emotion-recognition-0jl7.onrender.com
 paths:
   /api/status:
     get:
@@ -22,6 +22,8 @@ paths:
                     example: System is available
                   error:
                     type: string
+        '504':
+          description: Gateway Timeout
   /api/predict:
     post:
       summary: Predict emotion from an image
@@ -81,6 +83,8 @@ paths:
                   message:
                     type: string
                     example: "Error processing the image: ..."
+        '504':
+          description: Gateway Timeout
     options:
       summary: CORS Preflight
       responses:
@@ -94,6 +98,8 @@ paths:
                   status:
                     type: string
                     example: ok
+        '504':
+          description: Gateway Timeout
 components:
   securitySchemes:
     basicAuth:
