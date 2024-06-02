@@ -5,10 +5,15 @@ import numpy as np
 from keras.models import model_from_json
 import os
 from dotenv import load_dotenv
+from flask_httpauth import HTTPBasicAuth
+from werkzeug.security import check_password_hash, generate_password_hash
+import psycopg2
 
 app = Flask(__name__)
 CORS(app, resources={r"/api/*": {"origins": "*"}})
 app.config['CORS_HEADERS'] = 'Content-Type'
+
+auth = HTTPBasicAuth()
 
 load_dotenv()
 
@@ -17,6 +22,37 @@ DB_USER = os.getenv("DB_USER")
 DB_PASSWORD = os.getenv("DB_PASSWORD")
 DB_HOST = os.getenv("DB_HOST")
 DB_PORT = os.getenv("DB_PORT")
+
+
+def get_db_connection():
+    conn = psycopg2.connect(
+        dbname=DB_NAME,
+        user=DB_USER,
+        password=DB_PASSWORD,
+        host=DB_HOST,
+        port=DB_PORT
+    )
+    return conn
+
+
+@auth.verify_password
+def verify_password(username, password):
+    origin = request.headers.get('Origin')
+    referer = request.headers.get('Referer')
+
+    if origin == 'http://localhost:63342' or (referer and referer.startswith('http://localhost:63342')):
+        return True
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT password FROM users WHERE username = %s", (username,))
+    user = cursor.fetchone()
+    cursor.close()
+    conn.close()
+
+    if user and check_password_hash(user[0], password):
+        return username
+
 
 # Load model
 json_file = open("model/emotion_recognition.json", "r")
@@ -51,6 +87,7 @@ def check_system_status():
 
 
 @app.route('/api/predict', methods=['POST', 'OPTIONS'])
+@auth.login_required
 def predict_emotion():
     if request.method == 'OPTIONS':
         response = jsonify({'status': 'ok'})
@@ -64,18 +101,15 @@ def predict_emotion():
         if not file:
             return jsonify({'error': 'No file uploaded'}), 400
 
-        # Image decoding
         in_memory_file = np.frombuffer(file.read(), np.uint8)
         image = cv2.imdecode(in_memory_file, cv2.IMREAD_GRAYSCALE)
         print("Image decoded successfully")
 
-        # Face detection
         faces = face_cascade.detectMultiScale(image, 1.3, 5)
         if len(faces) == 0:
             return jsonify({'status': 'No faces detected'}), 200
         print(f"Faces detected:{len(faces)}")
 
-        # Emotion prediction
         emotions = []
         for (p, q, r, s) in faces:
             face_img = image[q:q + s, p:p + r]
@@ -85,10 +119,8 @@ def predict_emotion():
             prediction_label = labels[pred.argmax()]
             emotions.append({"emotion": prediction_label, "box": [int(p), int(q), int(r), int(s)]})
 
-        # Log the emotions detected
         print(f"Emotions detected: {emotions}")
 
-        # Send the response
         response = jsonify(emotions)
         response.headers.add("Access-Control-Allow-Origin", "*")
         response.headers.add("Access-Control-Allow-Methods", "GET, POST, OPTIONS")

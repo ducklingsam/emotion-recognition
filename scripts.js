@@ -20,7 +20,7 @@ fileInput.addEventListener('change', function() {
         const file = fileInput.files[0];
         const reader = new FileReader();
         reader.onload = function(e) {
-            preview.innerHTML = `<img src="${e.target.result}" style="max-width: 200px; max-height: 200px;" />`; // Создание превью изображения
+            preview.innerHTML = `<img src="${e.target.result}" style="max-width: 200px; max-height: 200px;" />`;
         };
         reader.readAsDataURL(file);
     }
@@ -28,10 +28,10 @@ fileInput.addEventListener('change', function() {
 
 async function checkSystemStatus() {
     const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(() => reject(new Error('Request timed out')), 120000) // 2 minutes timeout
+        setTimeout(() => reject(new Error('Request timed out')), 120000)
     );
 
-    const fetchPromise = fetch('https://emotion-recognition-0jl7.onrender.com/api/status')
+    const fetchPromise = fetch('http://127.0.0.1:5000/api/status')
         .then(response => response.json());
 
     try {
@@ -68,7 +68,7 @@ async function uploadImage() {
     loader.style.display = 'block';
 
     try {
-        const response = await fetch('https://emotion-recognition-0jl7.onrender.com/api/predict', {
+        const response = await fetch('http://127.0.0.1:5000/api/predict', {
             method: 'POST',
             body: formData
         });
@@ -188,7 +188,7 @@ async function sendFrameToServer(video) {
         const formData = new FormData();
         formData.append('image', blob);
         try {
-            const response = await fetch('http://emotion-recognition-0jl7.onrender.com/api/predict', {
+            const response = await fetch('http://127.0.0.1:5000/api/predict', {
                 method: 'POST',
                 body: formData
             });
