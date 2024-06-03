@@ -46,14 +46,14 @@ async function checkSystemStatus() {
                 document.getElementById('mainInterface').style.display = 'block';
             }, 3000);
         } else {
-            statusDiv.textContent = 'System is unavailable';
-            statusDiv.className = 'red blink';
+            statusDiv.textContent = 'We have updating in progress, try again in 5 min';
+            statusDiv.className = 'white blink';
             document.getElementById('mainInterface').style.display = 'none';
         }
     } catch (error) {
         const statusDiv = document.getElementById('status');
-        statusDiv.textContent = 'We have updating in progress, try again in 5 min';
-        statusDiv.className = 'white blink';
+        statusDiv.textContent = 'System is unavailable';
+        statusDiv.className = 'red blink';
         console.error('Error checking system status:', error);
     }
 }
