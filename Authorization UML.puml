@@ -1,0 +1,47 @@
+@startuml
+'!theme reddress-darkgreen
+'!theme crt-green
+!theme crt-amber
+
+actor User
+participant "Back" as App
+database "PostgreSQL Database" as DB
+
+User -> App: Request Access
+App -> App: Check Origin
+alt Origin is localhost:63342
+    App -> User: Access Granted
+else Other Origins
+    App -> DB: Fetch user by username
+    DB --> App: Return user record
+    alt User not found
+        App -> User: Access Denied
+    else User found
+        App -> App: Check password
+        alt Password correct
+            App -> App: Check is_first_week
+            alt is_first_week is true
+                App -> App: Check if one week has passed
+                alt One week passed
+                    App -> App: Update is_first_week to false
+                    App -> DB: Update user_info
+                    DB --> App: Acknowledgment
+                    App -> User: Access Denied
+                else One week not passed
+                    App -> User: Access Granted
+                end
+            else is_first_week is false
+                App -> App: Check if 30 days have passed
+                alt 30 days passed
+                    App -> User: Access Denied
+                else 30 days not passed
+                    App -> User: Access Granted
+                end
+            end
+        else Password incorrect
+            App -> User: Access Denied
+        end
+    end
+end
+
+@enduml
